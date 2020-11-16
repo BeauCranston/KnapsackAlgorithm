@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.Scanner;
 //This assignment was done by Beau Cranston 000397019
 
@@ -16,13 +18,13 @@ public class KnapSackMain {
         if ( DEBUG )
             System.out.print( s );
     }
-    
+
     public static Items[] getItems(String pathToCSV) {
         // adapted from https://stackabuse.com/reading-and-writing-csvs-in-java/
         BufferedReader csvReader;
         Items[] items = null;
         String row;
-       
+
         try {
             ArrayList<Items> al = new ArrayList<>();
             csvReader = new BufferedReader( new FileReader(pathToCSV));
@@ -31,7 +33,7 @@ public class KnapSackMain {
             while ((row = csvReader.readLine() ) != null ) {
                 String[] data = row.split(",");
                 int value=-1;
-                
+
                 for( int a = 0; a < data.length; a++ ) {
                     if ( desiredAttribute.equalsIgnoreCase( data[a] )) {
                         // assume each attribute only exists one time per item
@@ -53,7 +55,7 @@ public class KnapSackMain {
         } catch ( IOException e ) {
             System.err.println("IO Error while reading from file, aborting.");
         }
-        
+
         return items;
     }
 
@@ -92,7 +94,7 @@ public class KnapSackMain {
         }
 
         //Items[] it = getItems(); // class example
-        Items[] it = getItems(  path ); // assignment code
+        Items[] it = getItems( path ); // assignment code
         
         if ( it == null ) {
             System.out.println("No items found, aborting.");
@@ -127,10 +129,11 @@ public class KnapSackMain {
                         l.add(it[i]);
                         //l.add(it[i].name);
                         m[1][j] = new MemoItem( m[0][j-it[i].weight].value + it[i].value, l);
-                        m[0][j] = m[1][j];
+
                     }
                 }
             }
+            m[0] = Arrays.copyOf(m[1], m[1].length);
             String result = "";
             for ( MemoItem in : m[1] )
                 result += in.value + "\t";
