@@ -4,22 +4,19 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.Scanner;
+import java.util.*;
 //This assignment was done by Beau Cranston 000397019
 
 ///Stat to optimize:  WISDOM
 
 public class KnapSackMain {
-    
+
     public static void debugWrite( String s ) {
         if ( DEBUG )
             System.out.print( s );
     }
 
-    public static Items[] getItems(String pathToCSV) {
+    public static Items[] getItems(String pathToCSV, HashMap<String, Integer> desiredAttributes) {
         // adapted from https://stackabuse.com/reading-and-writing-csvs-in-java/
         BufferedReader csvReader;
         Items[] items = null;
@@ -35,9 +32,12 @@ public class KnapSackMain {
                 int value=-1;
 
                 for( int a = 0; a < data.length; a++ ) {
-                    if ( desiredAttribute.equalsIgnoreCase( data[a] )) {
+                    String stat = data[a];
+                    if (desiredAttributes.containsKey(stat)) {
                         // assume each attribute only exists one time per item
-                        value = Integer.parseInt(data[a+1]);
+                        int statWeight = desiredAttributes.get(stat).intValue();
+                        System.out.println(statWeight);
+                        value += statWeight * Integer.parseInt(data[a+1]);
                         break;
                     }
                 }
@@ -76,7 +76,7 @@ public class KnapSackMain {
 
     // These lines must be edited to your selection
     static final String[] attribs = {"HP","MN","MV","DR","HR","STR","DEX","CON","INT","WIS","LCK"};
-    static String desiredAttribute = attribs[9];
+
     //static int W = 6;  // class example
     //weight = gold that we have
     static int W = 1000; // assignment code
@@ -87,6 +87,9 @@ public class KnapSackMain {
         // uncomment the lines noted as class example to see the solution to the knapsack that was done
         // manually in the lecture.  Be sure to comment out the lines labelled assignment code
         String path= "dataFile.csv";
+        HashMap<String, Integer> statsToOptimize = new HashMap<>();
+        statsToOptimize.put(attribs[9], 5);
+        statsToOptimize.put(attribs[9], 5);
         try {
             Scanner sc = new Scanner(new File(path));
         } catch(Exception e) {
@@ -94,19 +97,19 @@ public class KnapSackMain {
         }
 
         //Items[] it = getItems(); // class example
-        Items[] it = getItems( path ); // assignment code
-        
+        Items[] it = getItems( path, statsToOptimize ); // assignment code
+
         if ( it == null ) {
             System.out.println("No items found, aborting.");
             System.exit(255);
         }
         //force memo item table to only have 2 rows
         MemoItem[][] m = new MemoItem[2][W+1];
-        
+
         for ( int j = 0; j <= W; j++ ) {
             m[0][j] = new MemoItem();
         }
-        
+
         for ( int i=1; i<it.length; i++ ) {
             for (int j = 0; j <= W; j++ ) {
                 if ( it[i].weight > j ) {
@@ -118,7 +121,7 @@ public class KnapSackMain {
                     if ( m[0][j].value > m[0][j-it[i].weight].value +
                             it[i].value ) {
                         // don't take it
-                        debugWrite( String.format("Won't take item %d, " + 
+                        debugWrite( String.format("Won't take item %d, " +
                                 "previous bag is worth more\n", i));
                         m[1][j] = m[0][j];
                     } else {
